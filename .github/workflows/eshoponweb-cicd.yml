@@ -79,23 +79,20 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Install Bicep CLI
-      - name: Install Bicep CLI
+      # Install Bicep CLI and Deploy Azure WebApp
+      - name: Install Bicep and Deploy Infrastructure
         uses: Azure/cli@v2
         with:
           inlineScript: |
+            # Install Bicep CLI
             az bicep install
 
-      # Deploy Azure WebApp using Bicep file
-      - name: deploy
-        uses: Azure/cli@v2
-        with:
-          inlineScript: |
+            # Deploy the Bicep template
             az deployment group create \
               --resource-group ${{ env.RESOURCE-GROUP }} \
               --template-file bicep-template/webapp.bicep \
               --parameters webAppName=${{ env.WEBAPP-NAME }} location=${{ env.LOCATION }} \
-              --mode Incremental
+              --mode Incremental --verbose --debug
 
       # Publish website to Azure App Service (WebApp)
       # Step disabled due to issue where the site sometimes can't be found: https://github.com/microsoft/pipelines-appservice-lib/issues/56. Instead deploy using CLI
