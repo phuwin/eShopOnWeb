@@ -13,7 +13,9 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
-          dotnet-quality: "preview"
+      - name: Verify .NET version
+        run: |
+          dotnet --version
 
       - name: Build with dotnet
         run: dotnet build ./eShopOnWeb.sln --configuration Release
