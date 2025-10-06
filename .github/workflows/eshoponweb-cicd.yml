@@ -22,7 +22,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: "8.0.102"
+          dotnet-version: "9.0.x"
       #Verify .NET version
       - name: Verify .NET version
         run: |
