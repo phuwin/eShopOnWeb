@@ -5,11 +5,11 @@ on: workflow_dispatch
 
 #Environment variables https://docs.github.com/en/actions/learn-github-actions/environment-variables
 env:
-  RESOURCE-GROUP: rg-eshoponweb-westeurope
-  LOCATION: westeurope
+  RESOURCE-GROUP: rg-eshoponweb-eastus
+  LOCATION: eastus
   TEMPLATE-FILE: infra/webapp.bicep
   SUBSCRIPTION-ID: c34cfc58-f5ba-4aa3-85f6-39e1256acef9
-  WEBAPP-NAME: devops-webapp-westeurope-149213324
+  WEBAPP-NAME: devops-webapp-eastus-277598071
 
 jobs:
   #Build, test and publish .net web project in repository
@@ -102,6 +102,22 @@ jobs:
       # Publish website to Azure App Service using CLI (WebApp)
       - name: Publish Website to WebApp
         uses: Azure/cli@v2
+        timeout-minutes: 15
         with:
           inlineScript: |
             az webapp deploy --name ${{ env.WEBAPP-NAME }} --resource-group ${{ env.RESOURCE-GROUP }} --src-path .net-app/app.zip --type zip
+
+            # Wait for the app to be ready
+            echo "Waiting for app to start..."
+            az webapp show --name ${{ env.WEBAPP-NAME }} --resource-group ${{ env.RESOURCE-GROUP }} --query "state" -o tsv
+
+            # Check if the app is running
+            for i in {1..30}; do
+              STATE=$(az webapp show --name ${{ env.WEBAPP-NAME }} --resource-group ${{ env.RESOURCE-GROUP }} --query "state" -o tsv)
+              if [ "$STATE" = "Running" ]; then
+                echo "App is running successfully!"
+                break
+              fi
+              echo "App state: $STATE, waiting... ($i/30)"
+              sleep 10
+            done
